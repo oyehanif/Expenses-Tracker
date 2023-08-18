@@ -1,6 +1,6 @@
 # expenses_tracker
 
-A new Flutter project.
+Let's Manage And Analiys your expense with my new Flutter project :sunglasses:.
 
 ## Getting Started
 
