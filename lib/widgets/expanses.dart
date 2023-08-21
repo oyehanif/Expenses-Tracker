@@ -1,3 +1,4 @@
+import 'package:expenses_tracker/widgets/chart/chart.dart';
 import 'package:expenses_tracker/widgets/new_expense.dart';
 import 'package:flutter/material.dart';
 
@@ -25,19 +26,55 @@ class _ExpansesState extends State<Expanses> {
         category: Category.leisure),
   ];
 
-  void addExpense(Expense list) {
+  void _addExpense(Expense list) {
     setState(() {
       _registeredExpenses.add(list);
     });
   }
 
+  void _removeExpense(Expense list) {
+    final expenseIndex = _registeredExpenses.indexOf(list);
+    setState(() {
+      _registeredExpenses.remove(list);
+    });
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 3),
+        content: const Text('Expense deleted.'),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () {
+            setState(
+              () {
+                _registeredExpenses.insert(expenseIndex, list);
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   void _openAddExpenseOverlay() {
     showModalBottomSheet(
-        context: context, builder: (ctx) => NewExpense(addExpense: addExpense));
+        context: context,
+        builder: (ctx) => NewExpense(addExpense: _addExpense));
   }
 
   @override
   Widget build(BuildContext context) {
+    Widget mainContent = const Center(
+      child: Text('No expense found. Start adding some !'),
+    );
+
+    if (_registeredExpenses.isNotEmpty) {
+      mainContent = ExpansesList(
+        expenses: _registeredExpenses,
+        onRemoveExpense: _removeExpense,
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Expense Tracker'),
@@ -52,9 +89,9 @@ class _ExpansesState extends State<Expanses> {
         width: double.infinity,
         child: Column(
           children: [
-            const Text("The Chart",
-                style: TextStyle(color: Colors.blue, fontSize: 25)),
-            Expanded(child: ExpansesList(expenses: _registeredExpenses))
+            const Text("The Chart"),
+            Chart(expenses: _registeredExpenses),
+            Expanded(child: mainContent)
           ],
         ),
       ),
